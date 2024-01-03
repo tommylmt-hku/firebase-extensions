@@ -1,0 +1,16 @@
+{
+  "functions": [
+    {
+      "source": "extensions/image-processing-api/functions",
+      "codebase": "default",
+      "ignore": [
+        "__tests__",
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
+    }
+  ]
+}

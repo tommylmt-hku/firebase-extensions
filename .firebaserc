@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "prod": "curios-meta",
+    "staging": "curios-staging",
+    "default": "curios-staging"
+  }
+}

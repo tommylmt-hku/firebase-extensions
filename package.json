@@ -2,7 +2,7 @@
   "name": "@invertase/firebase-extensions",
   "private": true,
   "devDependencies": {
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^27.0.0",
     "@types/node": "^15.12.2",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
@@ -20,6 +20,7 @@
   },
   "scripts": {
     "prepare": "npm run lerna:bootstrap && npm run lerna:link",
+    "dev:functions": "firebase emulators:start --only functions",
     "test": "lerna run test",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,mdx}\"",
     "check:linting": "eslint . --max-warnings=50",

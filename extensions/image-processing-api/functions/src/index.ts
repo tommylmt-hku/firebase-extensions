@@ -210,5 +210,17 @@ if (process.env.EXPRESS_SERVER === 'true') {
   );
 } else {
   firebase.initializeApp();
-  exports.handler = functions.handler.https.onRequest(app);
+
+  const fn = functions.region('asia-east2').https.onRequest(app);
+
+  exports.ext = {
+    image: {
+      processing: {
+        api: {
+          handler: fn,
+        },
+      },
+    },
+  };
+  exports['ext-image-processing-api-handler'] = fn;
 }
