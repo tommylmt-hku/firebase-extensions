@@ -19,7 +19,8 @@ import a2a from 'a2a';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import * as firebase from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import { onRequest } from 'firebase-functions/v2/https';
+import { info, error, warn, debug } from 'firebase-functions/logger';
 import helmet from 'helmet';
 import { StructError } from 'superstruct';
 
@@ -83,7 +84,7 @@ async function processImageRequest(
   });
   const { data, info } = output;
 
-  functions.logger.debug(`Processed a new request.`, validatedOperations);
+  debug(`Processed a new request.`, validatedOperations);
 
   const headers = {
     'Content-Type': `image/${info.format}`,
@@ -171,15 +172,15 @@ app.get(
 // Express requires the function to have 4 arguments for a handler
 // to be treated as an error handler.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use(function handleError(error: Error, req: Request, res: Response) {
-  if (error instanceof StructError || error instanceof AssertionError) {
-    functions.logger.warn(error.message, {
+app.use(function handleError(err: Error, req: Request, res: Response) {
+  if (err instanceof StructError || err instanceof AssertionError) {
+    warn(err.message, {
       url: req.url,
       query: req.query,
     });
-    res.status(400).send(error.message);
+    res.status(400).send(err.message);
   } else {
-    functions.logger.error(
+    error(
       'An error occurred processing a request, please report this issue to the GitHub ' +
         'repository for this extension and include this log entry with your report (omit any ' +
         'sensitive data).',
@@ -187,8 +188,8 @@ app.use(function handleError(error: Error, req: Request, res: Response) {
         url: req.url,
         query: req.query,
         error: {
-          message: error.message,
-          stack: error.stack,
+          message: err.message,
+          stack: err.stack,
         },
       },
     );
@@ -204,14 +205,18 @@ app.use('*', function notFoundHandler(_req, res) {
 
 if (process.env.EXPRESS_SERVER === 'true') {
   app.listen(3001, 'localhost', () =>
-    functions.logger.info(
-      `Local dev server listening on http://localhost:3001`,
-    ),
+    info(`Local dev server listening on http://localhost:3001`),
   );
 } else {
   firebase.initializeApp();
 
-  const fn = functions.region('asia-east2').https.onRequest(app);
+  const fn = onRequest(
+    {
+      region: 'asia-east2',
+      memory: '1GiB',
+    },
+    app,
+  );
 
   exports.ext = {
     image: {
